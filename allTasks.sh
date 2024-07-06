@@ -58,10 +58,11 @@ scanAll(){
     sed -n "/ |$GOAL_FILTER| /p; / >.*</p" $tempFile  > $newFile
     cat $newFile > $tempFile
   fi
-  if [[ -n "$DATE_FILTER" ]]; then
-    start_date="2024-07-01"
-    end_date="2024-07-10"
+  if [[ -n "$DATE_FILTER" ]]; then 
 
+    start_date=$(date +%F)
+    end_date=$(date -d "$f_actual + $DATE_FILTER" +%F)
+    
     # Convert dates to seconds since epoch
     start_ts=$(date -d "$start_date" +%s)
     end_ts=$(date -d "$end_date" +%s)
@@ -73,17 +74,19 @@ scanAll(){
     current_ts=$start_ts
     while [ $current_ts -le $end_ts ]; do
         # Convert the current timestamp back to date
-        current_date=$(date -d "@$current_ts" +%Y-%m-%d)
+        current_date=$(date -d "@$current_ts" +%F)
         # Append the date to the array
         dates+=("$current_date")
         # Move to the next day (add 86400 seconds)
         current_ts=$(($current_ts + 86400))
     done
+    allDates=$(echo "${dates[@]}" | sed 's/\([^ ]*\)/\/ ~\1\/p;/g')
 
-    for date in "${dates[@]}"; do
-      echo "Processing date: $date"
-      # Add your processing logic here
-    done
+    sed -n "/ ~.*/p; / >.*</p" $tempFile  > $newFile
+    cat $newFile > $tempFile
+
+    sed -n "$allDates / >.*</p" $tempFile  > $newFile
+    cat $newFile > $tempFile
   fi
 
 
