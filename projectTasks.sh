@@ -23,12 +23,33 @@ scanProject(){
     fi
   done < "$input_file"
 }
-processTasks(){  
-  if [ "$2" != "$nameFile" ]; then
-    echo -e "\n$2" >> "$3"
+processTasks(){ 
+
+  if [[ -n "$DATE_FILTER" ]]; then 
+    fv=$(echo "$1" | grep -oP '(?<=~)\d{4}-\d{2}-\d{2}')
+    if [[ -n "$fv" ]]; then
+      f_actual=$(date +%F)
+      f_final=$(date -d "$f_actual + $DATE_FILTER" +%F)
+      f_start=$(date -d "$f_actual" +%s)
+      f_end=$(date -d "$f_final" +%s)
+      f_scan=$(date -d "$fv" +%s)
+      if [[ "$f_scan" -ge "$f_start" ]] && [[ "$f_scan" -le "$f_end" ]]; then
+        if [ "$2" != "$nameFile" ]; then
+        echo -e "\n$2" >> "$3"
+        fi
+        nameFile=$2
+        echo -e "$1" >> "$3"
+      fi
+    fi
+  else
+    # Imprimir las variables
+    if [ "$2" != "$nameFile" ]; then
+      echo -e "\n$2" >> "$3"
+      #echo -e "\n$2"
+    fi
+    nameFile=$2
+    echo -e "$1" >> "$3"
   fi
-  nameFile=$2
-  echo -e "$1" >> "$3"
 }
 
 scanProjectDefined(){
