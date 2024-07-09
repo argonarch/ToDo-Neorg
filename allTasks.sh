@@ -1,8 +1,8 @@
 #!/bin/bash
 source colors.sh
 source projectTasks.sh
-root_folder="../1_Proyectos/"
-root_folder2="../2_Areas/"
+root_folder="/hdd/kael/Notes/Home/1_Proyectos/"
+root_folder2="/hdd/kael/Notes/Home/2_Areas/"
 
 todoNona="${Red} ${Nc}"
 arrow=${Green}"->"${Nc}
@@ -10,8 +10,9 @@ archivo="pathProjects.sh"
 getAllTasks(){
 # Usar find para listar todos los archivos y luego cat para obtener su contenido
 if [ -n "$ROOT_FOLDER" ]; then
-  echo -e "$arrow $ROOT_FOLDER:"
-  scanAll "../$ROOT_FOLDER"
+  name=$(basename $ROOT_FOLDER)
+  echo -e "$arrow $name:"
+  scanAll "$ROOT_FOLDER"
 else
   echo -e "$arrow Proyectos:"
   scanAll "$root_folder"
