@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 orderTask(){
   input_file="$1"
 
@@ -12,10 +9,9 @@ orderTask(){
   # Limpiar archivo de salida si ya existe
   > $output_file
 
-  # Agregar encabezado para las tareas incompletas
+  # Tareas Incompletas 
   echo -e "Tareas Incompletas:\n" >> $output_file
 
-  # Leer el archivo línea por línea y agregar tareas incompletas
   while IFS= read -r line
   do
       if [[ $line == *"- ( )"* ]]; then
@@ -23,19 +19,19 @@ orderTask(){
       fi
   done < "$input_file"
 
+  # Tareas en Proceso
   echo -e "\nTareas En Proceso:\n" >> $output_file
 
-  # Leer el archivo línea por línea y agregar tareas incompletas
   while IFS= read -r line
   do
       if [[ $line == *"- (-)"* ]]; then
           echo "$line" >> $output_file
       fi
   done < "$input_file"
-  # Agregar encabezado para las tareas completadas
-  echo -e "\nTareas Completadas:\n" >> $output_file
 
-  # Leer el archivo línea por línea y agregar tareas completadas
+  # Taras Completadas 
+  echo -e "\nTareas Completadas:\n" >> $output_file
+  
   while IFS= read -r line
   do
       if [[ $line == *"- (x)"* ]]; then
@@ -43,11 +39,24 @@ orderTask(){
       fi
   done < "$input_file"
   
-  echo -e "\nNo Tareas:\n" >> $output_file
+
+  # Tareas Archivadas 
+  echo -e "\nTareas Archivadas:\n" >> $output_file
 
   while IFS= read -r line
   do
-    if [[ $line != *"- ( )"* ]] && [[ $line != *"- (x)"* ]] && [[ $line != *"- (-)"* ]] && [[ $line != *"Tareas"* ]] && [[ -n $line ]]; then
+      if [[ $line == *"- (?)"* ]]; then
+          echo "$line" >> $output_file
+      fi
+  done < "$input_file"
+  
+ 
+  # No Tareas  
+  echo -e "\nNo Tareas:\n" >> $output_file
+  
+  while IFS= read -r line
+  do
+    if [[ ! $line =~ -\ \(.*\) ]] && [[ $line != *"Tareas"* ]] && [[ -n $line ]]; then
       echo "$line" >> $output_file
     fi
   done < "$input_file"
@@ -56,8 +65,8 @@ orderTask(){
 }
 
 orderTasks(){
-root_folder="../1_Proyectos/"
-root_folder2="../2_Areas/"
+root_folder="/hdd/kael/Notes/Home/1_Proyectos/"
+root_folder2="/hdd/kael/Notes/Home/2_Areas/"
 order "$root_folder"
 order "$root_folder2"
 }

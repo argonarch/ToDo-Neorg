@@ -15,7 +15,7 @@ scanProject(){
   filename=$(basename "$1" Task.norg)
   filename_transform="$(echo "$filename" | sed 's/\([a-z]\)\([A-Z]\)/\1 \2/g')"
   filename_transform="$(tr '[:lower:]' '[:upper:]' <<< ${filename_transform:0:1})${filename_transform:1}"
-  filename_final="${Cyan} > $filename_transform < ${Nc}"
+  filename_final=" > $filename_transform < "
   while IFS= read -r line
   do
     if [[ $line == *"- ("* ]]; then

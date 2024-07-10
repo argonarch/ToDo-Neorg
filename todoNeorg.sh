@@ -21,16 +21,24 @@ main(){
             echo "Uso: -t <type>"
           fi
           ;;
-      -g|--goal)
+      -c|--context)
+          if [ -n "$2" ]; then
+            CONTEXT_FILTER="$2"
+            shift 2
+          else
+            echo "Uso: -c <context>"
+          fi
+          ;;
+      -d|--due)
           if [ -n "$2" ]; then
             if [ "$2" == "none" ]; then
-              GOAL_FILTER="  "
+              DUE_FILTER="  "
             else
-              GOAL_FILTER="$2"
+              DUE_FILTER="$2"
             fi
             shift 2
           else
-            echo "Uso: -g <goal>"
+            echo "Uso: -d <due>"
           fi
           ;;
       -p|--priority)
@@ -83,7 +91,7 @@ main(){
           ;;
     esac
   done
-  if [ -n "$TYPE_FILTER" ] || [ -n "$PRIORITY_FILTER" ] || [ -n "$PROJECT_DEFINED" ] || [ -n "$ROOT_FOLDER" ] || [ -n "$DATE_FILTER" ] || [[ -n "$GOAL_FILTER" ]]; then
+  if [ -n "$TYPE_FILTER" ] || [ -n "$PRIORITY_FILTER" ] || [ -n "$PROJECT_DEFINED" ] || [ -n "$ROOT_FOLDER" ] || [ -n "$DATE_FILTER" ] || [[ -n "$DUE_FILTER" ]] || [[ -n "$CONTEXT_FILTER" ]]; then
     getAllTasks 
   fi
 }

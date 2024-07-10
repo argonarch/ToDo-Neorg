@@ -52,11 +52,15 @@ scanAll(){
     cat $newFile > $tempFile
   fi
   if [[ -n "$PRIORITY_FILTER" ]]; then
-    sed -n "/) ($PRIORITY_FILTER) /p; / >.*</p" $tempFile  > $newFile
+    sed -n "/) ($PRIORITY_FILTER)/p; / >.*</p" $tempFile  > $newFile
     cat $newFile > $tempFile
   fi
-  if [[ -n "$GOAL_FILTER" ]]; then
-    sed -n "/ |$GOAL_FILTER| /p; / >.*</p" $tempFile  > $newFile
+  if [[ -n "$DUE_FILTER" ]]; then
+    sed -n "/ |$DUE_FILTER|/p; / >.*</p" $tempFile  > $newFile
+    cat $newFile > $tempFile
+  fi
+  if [[ -n "$CONTEXT_FILTER" ]]; then
+    sed -n "/@$CONTEXT_FILTER/p; / >.*</p" $tempFile  > $newFile
     cat $newFile > $tempFile
   fi
   if [[ -n "$DATE_FILTER" ]]; then 
@@ -71,8 +75,10 @@ scanAll(){
   />.*</ && !/) \|/ { next }
   { print }
   ' $newFile > $tempFile
-
   sed -i "s/ >/\n >/g" $tempFile
+  
+  cat "$tempFile" > $1/tasks.todo
+
   sed -i "s/|\(.*\)|/--> \1 |/g" $tempFile
   sed -i "s/- ( )/ /g" $tempFile
   sed -i "s/- (x)/ /g" $tempFile
