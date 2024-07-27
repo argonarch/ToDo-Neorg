@@ -1,7 +1,7 @@
 #!/bin/bash
-source allTasks.sh
-source projectTasks.sh
-source order.sh
+source "$(dirname "$0")/allTasks.sh"
+source "$(dirname "$0")/projectTasks.sh"
+source "$(dirname "$0")/order.sh"
 main(){
   while [[ $# -gt 0 ]]; do
     case "$1" in

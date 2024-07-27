@@ -1,14 +1,14 @@
 #!/bin/bash
-source colors.sh
-todoClick=${Green}" "${Nc} 
-todoNone=${Red}" "${Nc}
-todoProcess=${Yellow}" "${Nc}
-charA=${Yellow}"A"${Nc}
-charB=${Green}"B"${Nc}
-charC=${Blue}"C"${Nc}
-charD=${Red}"D"${Nc}
-arrow=${Green}"->"${Nc}
-champ="${Green}|${Nc}"
+source "$(dirname "$0")/colors.sh"
+#todoClick=${Green}" "${Nc} 
+#todoNone=${Red}" "${Nc}
+#todoProcess=${Yellow}" "${Nc}
+#charA=${Yellow}"A"${Nc}
+#charB=${Green}"B"${Nc}
+#charC=${Blue}"C"${Nc}
+#charD=${Red}"D"${Nc}
+#arrow=${Green}"->"${Nc}
+#champ="${Green}|${Nc}"
 
 scanProject(){
   input_file="$1"

@@ -65,10 +65,11 @@ orderTask(){
 }
 
 orderTasks(){
-root_folder="/hdd/kael/Notes/Home/1_Proyectos/"
-root_folder2="/hdd/kael/Notes/Home/2_Areas/"
-order "$root_folder"
-order "$root_folder2"
+if [ -n "$ROOT_FOLDER" ]; then
+  order "$ROOT_FOLDER"
+else
+  echo -e "Root File Dont Exist"
+fi
 }
 order(){
   find "$1" -type f -name "*.norg" | while read -r file
