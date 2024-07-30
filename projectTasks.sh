@@ -12,7 +12,7 @@ source "$(dirname "$0")/colors.sh"
 
 scanProject(){
   input_file="$1"
-  filename=$(basename "$1" Task.norg)
+  filename=$(basename "$1" .norg)
   filename_transform="$(echo "$filename" | sed 's/\([a-z]\)\([A-Z]\)/\1 \2/g')"
   filename_transform="$(tr '[:lower:]' '[:upper:]' <<< ${filename_transform:0:1})${filename_transform:1}"
   filename_final=" > $filename_transform < "

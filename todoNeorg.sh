@@ -7,7 +7,7 @@ main(){
     case "$1" in
       -t|--type)
           if [ -n "$2" ]; then
-            if [ "$2" == "none" ]; then
+            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
               TYPE_FILTER=" "
             elif [ "$2" == "done" ]; then
               TYPE_FILTER="x"
@@ -29,9 +29,9 @@ main(){
             echo "Uso: -c <context>"
           fi
           ;;
-      -d|--due)
+      -e|--due)
           if [ -n "$2" ]; then
-            if [ "$2" == "none" ]; then
+            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
               DUE_FILTER="  "
             else
               DUE_FILTER="$2"
@@ -43,7 +43,7 @@ main(){
           ;;
       -p|--priority)
           if [ -n "$2" ]; then
-            if [ "$2" == "none" ]; then
+            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
               PRIORITY_FILTER=" "
             else
               PRIORITY_FILTER="$2"

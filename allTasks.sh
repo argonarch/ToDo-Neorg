@@ -20,7 +20,7 @@ if [ -n "$ROOT_FOLDER" ]; then
   name=$(basename "$ROOT_FOLDER")
   echo -e "- $name: -"
   find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
-    filename=$(basename "$file" Task.norg)
+    filename=$(basename "$file" .norg)
     echo -e "$arrow $filename"
   done
 else
@@ -34,7 +34,7 @@ scanAll(){
   newFile=$(mktemp)
   find "$1" -type f -name "*.norg" | while IFS= read -r file; do
   if [ -n "$PROJECT_DEFINED" ]; then 
-    filename=$(basename "$file" Task.norg)
+    filename=$(basename "$file" .norg)
     if [ "$filename" == "$PROJECT_DEFINED" ]; then
       scanProject "$file" "$tempFile"
     else
