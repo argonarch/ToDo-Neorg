@@ -2,88 +2,75 @@
 source "$(dirname "$0")/colors.sh"
 source "$(dirname "$0")/projectTasks.sh"
 
-arrow=${Green}"->"${Nc}
-getAllTasks(){
-# Usar find para listar todos los archivos y luego cat para obtener su contenido
-if [ -n "$ROOT_FOLDER" ]; then
-  name=$(basename "$ROOT_FOLDER")
-  echo -e "$arrow $name:"
-  scanAll "$ROOT_FOLDER"
-else
-  echo -e "Root File Dont Exist"
-fi
-}
+arrow=$Green"->"$Nc
+todoClick=$Green" "$Nc 
+todoNone=$Red" "$Nc
+todoProcess=$Yellow" "$Nc
+charA=$Yellow"A"$Nc
+charB=$Green"B"$Nc
+charC=$Blue"C"$Nc
+charD=$Red"D"$Nc
+champ="$Green|$Nc"
 
+tempFile=$(mktemp)
+newFile=$(mktemp)
 
 listAllProjects(){
-if [ -n "$ROOT_FOLDER" ]; then
   name=$(basename "$ROOT_FOLDER")
   echo -e "- $name: -"
+  counter=0
   find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
     filename=$(basename "$file" .norg)
-    echo -e "$arrow $filename"
+    counter=$((counter+1))
+    if [ "$counter" -gt 9 ]; then
+      echo -e "$counter $arrow $filename"
+    else
+      echo -e "$counter  $arrow $filename"
+    fi
   done
-else
-  echo -e "Root File Dont Exist"
-fi
-
 }
 
 scanAll(){
-  tempFile=$(mktemp)
-  newFile=$(mktemp)
-  find "$1" -type f -name "*.norg" | while IFS= read -r file; do
-  if [ -n "$PROJECT_DEFINED" ]; then 
-    filename=$(basename "$file" .norg)
-    if [ "$filename" == "$PROJECT_DEFINED" ]; then
-      scanProject "$file" "$tempFile"
-    else
-      continue  
-    fi
-  elif [ -s "$file" ]; then
+  name=$(basename "$ROOT_FOLDER")
+  echo -e "$arrow $name:"
+
+  find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
+  if [ -s "$file" ]; then
     scanProject "$file" "$tempFile"
   fi
   done
 
-  if [[ -n "$TYPE_FILTER" ]]; then
-    sed -n "/- ($TYPE_FILTER)/p; / >.*</p" "$tempFile"  > "$newFile"
-    cat "$newFile" > "$tempFile"
-  fi
-  if [[ -n "$PRIORITY_FILTER" ]]; then
-    sed -n "/) ($PRIORITY_FILTER)/p; / >.*</p" "$tempFile"  > "$newFile"
-    cat "$newFile" > "$tempFile"
-  fi
-  if [[ -n "$DUE_FILTER" ]]; then
-    sed -n "/ |$DUE_FILTER|/p; / >.*</p" "$tempFile"  > "$newFile"
-    cat "$newFile" > "$tempFile"
-  fi
-  if [[ -n "$CONTEXT_FILTER" ]]; then
-    sed -n "/@$CONTEXT_FILTER/p; / >.*</p" "$tempFile"  > "$newFile"
-    cat "$newFile" > "$tempFile"
-  fi
-  if [[ -n "$DATE_FILTER" ]]; then 
-    sed -n "/ ~.*/p; / >.*</p" "$tempFile"  > "$newFile"
-    cat "$newFile" > "$tempFile"
+  apply_filter "$TYPE_FILTER" "- ($TYPE_FILTER)"
+  apply_filter "$PRIORITY_FILTER" ") ($PRIORITY_FILTER)"
+  apply_filter "$DUET_FILTER" " |$DUET_FILTER|"
+  apply_filter "$CONTEXT_FILTER" " @$CONTEXT_FILTER"
+  if [ -n "$DATE_FILTER" ]; then
+    grep -e " >.*<" -e " ~.*" "$tempFile" > "$newFile"
+    true > "$tempFile"
+    while IFS= read -r line; do
+      processDate "$line" "$tempFile"
+    done < "$newFile"
   fi
 
-  sed -i "/ >.*</s/^/\n/" "$newFile"
-
+  sed -i "/ >.*</s/^/\n/" "$tempFile"
   awk '
   BEGIN { RS=""; FS="\n" }
   />.*</ && !/) \|/ { next }
   { print }
-  ' "$newFile" > "$tempFile"
-  sed -i "s/ >/\n >/g" "$tempFile"  
+  ' "$tempFile" > "$newFile"
 
-  sed -i "s/|\(.*\)|/--> \1 |/g" "$tempFile"
-  sed -i "s/- ( )/ /g" "$tempFile"
-  sed -i "s/- (x)/ /g" "$tempFile"
-  sed -i "s/- (-)/ /g" "$tempFile"
-  sed -i "s/ (A) / A /g" "$tempFile"
-  sed -i "s/ (B) / B /g" "$tempFile"
-  sed -i "s/ (C) / C /g" "$tempFile"
-  sed -i "s/ (D) / D /g" "$tempFile"
-  sed -i "s/ ( ) /   /g" "$tempFile"
-  cat "$tempFile"  
+  sed -i -e "s/ >/\n $BCyan>/g"  -e "s/ </ < $Nc/g" -e "s/|\(.*\)|/ $arrow \1 $champ/g" \
+      -e "s/- ( )/$todoNone /g" -e "s/- (x)/$todoClick /g" -e "s/- (-)/$todoProcess /g" \
+      -e "s/ (A) / $charA /g" -e "s/ (B) / $charB /g" -e "s/ (C) / $charC /g" -e "s/ (D) / $charD /g" \
+      -e "s/ ( ) /   /g" "$newFile"
+  cat "$newFile"
+}
 
+apply_filter() {
+  local filter="$1"
+  local pattern="$2"
+  if [ -n "$filter" ]; then
+    grep -e " >.*<" -e "$pattern" "$tempFile" > "$newFile"
+    mv "$newFile" "$tempFile"
+  fi
 }

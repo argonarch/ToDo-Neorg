@@ -17,28 +17,22 @@ main(){
               TYPE_FILTER="$2"
             fi
             shift 2
-          else
-            echo "Uso: -t <type>"
           fi
           ;;
       -c|--context)
           if [ -n "$2" ]; then
             CONTEXT_FILTER="$2"
             shift 2
-          else
-            echo "Uso: -c <context>"
           fi
           ;;
       -e|--due)
           if [ -n "$2" ]; then
             if [ "$2" == "none" ] || [ "$2" == "n" ]; then
-              DUE_FILTER="  "
+              DUET_FILTER="  "
             else
-              DUE_FILTER="$2"
+              DUET_FILTER="$2"
             fi
             shift 2
-          else
-            echo "Uso: -d <due>"
           fi
           ;;
       -p|--priority)
@@ -49,50 +43,40 @@ main(){
               PRIORITY_FILTER="$2"
             fi
             shift 2
-          else
-            echo "Uso: -p <priority>"
           fi
           ;;
       -s|--scan)
           if [ -n "$2" ]; then
             PROJECT_DEFINED="$2"
             shift 2
-          else
-            echo "Uso: -s <project>"
           fi
           ;;
       -d|--date)
           if [ -n "$2" ]; then
             DATE_FILTER="$2"
             shift 2
-          else
-            echo "Uso: -d <date>"
           fi
           ;;
       -r|--root)
           if [ -n "$2" ]; then
             ROOT_FOLDER="$2"
             shift 2
-          else
-            echo "Uso: -r <folder>"
           fi
           ;;
       -o|--order)
-          orderTasks
+          order
           exit 0
           ;;
       -l|--list)
           listAllProjects
           exit 0
           ;;
-      -a|--all)
-          getAllTasks
-          exit 0
-          ;;
     esac
   done
-  if [ -n "$TYPE_FILTER" ] || [ -n "$PRIORITY_FILTER" ] || [ -n "$PROJECT_DEFINED" ] || [ -n "$ROOT_FOLDER" ] || [ -n "$DATE_FILTER" ] || [[ -n "$DUE_FILTER" ]] || [[ -n "$CONTEXT_FILTER" ]]; then
-    getAllTasks 
+  if [ -n "$TYPE_FILTER" ] || [ -n "$PRIORITY_FILTER" ] || [ -n "$PROJECT_DEFINED" ]  || [ -n "$DATE_FILTER" ] || [ -n "$DUE_FILTER" ] || [ -n "$CONTEXT_FILTER" ] && [ -n "$ROOT_FOLDER" ]; then
+    scanAll 
+  else  
+    echo -e "Root File Dont Exist"
   fi
 }
 
