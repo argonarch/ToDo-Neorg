@@ -1,45 +1,11 @@
 #!/bin/bash
 source "$(dirname "$0")/colors.sh"
-source "$(dirname "$0")/projectTasks.sh"
-
-arrow=$Green"->"$Nc
-todoClick=$Green" "$Nc 
-todoNone=$Red" "$Nc
-todoProcess=$Yellow" "$Nc
-charA=$Yellow"A"$Nc
-charB=$Green"B"$Nc
-charC=$Blue"C"$Nc
-charD=$Red"D"$Nc
-champ="$Green|$Nc"
+source "$(dirname "$0")/utils.sh"
 
 tempFile=$(mktemp)
 newFile=$(mktemp)
 
-listAllProjects(){
-  name=$(basename "$ROOT_FOLDER")
-  echo -e "- $name: -"
-  counter=0
-  find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
-    filename=$(basename "$file" .norg)
-    counter=$((counter+1))
-    if [ "$counter" -gt 9 ]; then
-      echo -e "$counter $arrow $filename"
-    else
-      echo -e "$counter  $arrow $filename"
-    fi
-  done
-}
-
-scanAll(){
-  name=$(basename "$ROOT_FOLDER")
-  echo -e "$arrow $name:"
-
-  find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
-  if [ -s "$file" ]; then
-    scanProject "$file" "$tempFile"
-  fi
-  done
-
+scanner(){
   apply_filter "$TYPE_FILTER" "- ($TYPE_FILTER)"
   apply_filter "$PRIORITY_FILTER" ") ($PRIORITY_FILTER)"
   apply_filter "$DUET_FILTER" " |$DUET_FILTER|"
@@ -53,6 +19,7 @@ scanAll(){
   fi
 
   sed -i "/ >.*</s/^/\n/" "$tempFile"
+
   awk '
   BEGIN { RS=""; FS="\n" }
   />.*</ && !/) \|/ { next }
@@ -74,3 +41,28 @@ apply_filter() {
     mv "$newFile" "$tempFile"
   fi
 }
+
+scanProject(){
+  input_file="$1"
+  filename=" > $(basename "$1" .norg | sed -e 's/\([a-z]\)\([A-Z]\)/\1 \2/g' -e 's/^\(.\)/\U\1/g') <"
+  echo -e "$filename" >> "$tempFile"
+  grep -e "- (" "$input_file" | sed 's/( ) |/(Z) |/ ' | sort | sed 's/(Z) |/( ) |/'  >> "$tempFile"
+}
+
+processDate(){ 
+  fv=$(echo "$1" | grep -oP '(?<=~)\d{4}-\d{2}-\d{2}')
+  if [[ -n "$fv" ]]; then
+    f_actual=$(date +%F)
+    f_final=$(date -d "$f_actual + $DATE_FILTER" +%F)
+    f_start=$(date -d "$f_actual" +%s)
+    f_end=$(date -d "$f_final" +%s)
+    f_scan=$(date -d "$fv" +%s)
+    if [[ "$f_scan" -ge "$f_start" ]] && [[ "$f_scan" -le "$f_end" ]]; then
+      echo "$1" >> "$2"
+    fi
+  else
+    echo "$1" >> "$2"
+  fi
+}
+
+

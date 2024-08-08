@@ -1,82 +1,49 @@
 #!/bin/bash
-source "$(dirname "$0")/allTasks.sh"
-source "$(dirname "$0")/projectTasks.sh"
+source "$(dirname "$0")/tasker.sh"
 source "$(dirname "$0")/order.sh"
+source "$(dirname "$0")/sender.sh"
+source "$(dirname "$0")/utils.sh"
+
 main(){
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -t|--type)
-          if [ -n "$2" ]; then
-            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
-              TYPE_FILTER=" "
-            elif [ "$2" == "done" ]; then
-              TYPE_FILTER="x"
-            elif [ "$2" == "process" ]; then
-              TYPE_FILTER="-"
-            else
-              TYPE_FILTER="$2"
-            fi
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && TYPE_FILTER="$2" && FILTER="true" && shift 2 ;;
       -c|--context)
-          if [ -n "$2" ]; then
-            CONTEXT_FILTER="$2"
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && CONTEXT_FILTER="$2" && FILTER="true" && shift 2 ;;
       -e|--due)
-          if [ -n "$2" ]; then
-            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
-              DUET_FILTER="  "
-            else
-              DUET_FILTER="$2"
-            fi
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && DUET_FILTER="$2" && FILTER="true" && shift 2 ;;
       -p|--priority)
-          if [ -n "$2" ]; then
-            if [ "$2" == "none" ] || [ "$2" == "n" ]; then
-              PRIORITY_FILTER=" "
-            else
-              PRIORITY_FILTER="$2"
-            fi
-            shift 2
-          fi
-          ;;
-      -s|--scan)
-          if [ -n "$2" ]; then
-            PROJECT_DEFINED="$2"
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && PRIORITY_FILTER="$2" && FILTER="true" && shift 2 ;;
+      -P|--project)
+          [ -n "$2" ] && PROJECT_FILTER="$2" && FILTER="true" && shift 2 ;;
       -d|--date)
-          if [ -n "$2" ]; then
-            DATE_FILTER="$2"
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && DATE_FILTER="$2" && FILTER="true" && shift 2 ;;
+      -a|--add)
+          [ -n "$2" ] && ADD_TEXT="$2" && shift 2 ;;
       -r|--root)
-          if [ -n "$2" ]; then
-            ROOT_FOLDER="$2"
-            shift 2
-          fi
-          ;;
+          [ -n "$2" ] && ROOT_FOLDER="$2" && shift 2 ;;
+      -f|--file)
+          [ -n "$2" ] && ROOT_FILE="$2" && shift 2 ;;
       -o|--order)
           order
-          exit 0
-          ;;
+          exit 0 ;;
+      -s|--sender)
+          sender
+          exit 0 ;;
       -l|--list)
-          listAllProjects
-          exit 0
-          ;;
+          listProjects
+          exit 0 ;;
     esac
   done
-  if [ -n "$TYPE_FILTER" ] || [ -n "$PRIORITY_FILTER" ] || [ -n "$PROJECT_DEFINED" ]  || [ -n "$DATE_FILTER" ] || [ -n "$DUE_FILTER" ] || [ -n "$CONTEXT_FILTER" ] && [ -n "$ROOT_FOLDER" ]; then
-    scanAll 
+  if [ -n "$ROOT_FOLDER" ] && [ -n "$FILTER" ]; then
+    filter
+    scanFolder
+  elif [ -n "$ROOT_FILE" ] && [ -n "$FILTER" ]; then
+    filter
+    scanFile
   else  
-    echo -e "Root File Dont Exist"
+    echo "Root File Dont Exist or Not Pass Any Filter"
   fi
 }
 
