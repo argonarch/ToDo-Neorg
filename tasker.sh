@@ -1,31 +1,6 @@
 #!/bin/bash
-source "$(dirname "$0")/scanner.sh"
 source "$(dirname "$0")/order.sh"
 
-scanFolder(){
-  [ -n "$PROJECT_FILTER" ] && scanDefined && exit 0
-  name=$(basename "$ROOT_FOLDER")
-  echo -e "$arrow $name:"
-
-  find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
-  [ -s "$file" ] && scanProject "$file" 
-  done
-
-  scanner 
-}
-
-scanDefined(){
-  find "$ROOT_FOLDER" -type f -name "$PROJECT_FILTER.norg" | while IFS= read -r file; do
-  [ -s "$file" ] && scanProject "$file" 
-  done
-  scanner
-}
-
-scanFile() {
-  [ -n "$ADD_TEXT" ] && addTask && exit 0
-  scanProject "$ROOT_FILE" 
-  scanner 
-}
 
 listProjects(){ 
   name=$(basename "$ROOT_FOLDER")
@@ -40,6 +15,19 @@ listProjects(){
       echo -e "$counter  $arrow $filename"
     fi
   done
+}
+
+sendTask(){
+  tasks=$(grep -E "\+\w+" "$ROOT_FILE")
+  while IFS= read -r task; do
+    project=$(echo "$task" | grep -oP '(?<=\+).*?(?=\s|$)')
+    find "$ROOT_FOLDER" -type f -name "$project.norg" | while IFS= read -r file; do
+      taskWP=$(echo "$task" | sed 's/\+.[^ ]* *//')
+      echo "$taskWP" >> "$file"
+      orderTask "$file"
+      sed -i "/$task/d" "$ROOT_FILE"
+    done
+  done <<< "$tasks"
 }
 
 addTask(){

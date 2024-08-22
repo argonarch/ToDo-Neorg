@@ -1,15 +1,15 @@
 #!/bin/bash
-source "$(dirname "$0")/colors.sh"
+source "$(dirname "$0")/styles.sh"
 source "$(dirname "$0")/utils.sh"
 
 tempFile=$(mktemp)
 newFile=$(mktemp)
 
 scanner(){
-  apply_filter "$TYPE_FILTER" "- ($TYPE_FILTER)"
-  apply_filter "$PRIORITY_FILTER" ") ($PRIORITY_FILTER)"
-  apply_filter "$DUET_FILTER" " |$DUET_FILTER|"
-  apply_filter "$CONTEXT_FILTER" " @$CONTEXT_FILTER"
+  apply_filter "$TYPE_FILTER" "- ($TYPE_FILTER)" "$newFile" "$tempFile"
+  apply_filter "$PRIORITY_FILTER" ") ($PRIORITY_FILTER)" "$newFile" "$tempFile"
+  apply_filter "$DUET_FILTER" " |$DUET_FILTER|" "$newFile" "$tempFile"
+  apply_filter "$CONTEXT_FILTER" " @$CONTEXT_FILTER" "$newFile" "$tempFile"
   if [ -n "$DATE_FILTER" ]; then
     grep -e " >.*<" -e " ~.*" "$tempFile" > "$newFile"
     true > "$tempFile"
@@ -33,13 +33,29 @@ scanner(){
   cat "$newFile"
 }
 
-apply_filter() {
-  local filter="$1"
-  local pattern="$2"
-  if [ -n "$filter" ]; then
-    grep -e " >.*<" -e "$pattern" "$tempFile" > "$newFile"
-    mv "$newFile" "$tempFile"
-  fi
+scanFolder(){
+  [ -n "$PROJECT_FILTER" ] && scanDefined && exit 0
+  name=$(basename "$ROOT_FOLDER")
+  echo -e "$arrow $name:"
+
+  find "$ROOT_FOLDER" -type f -name "*.norg" | while IFS= read -r file; do
+  [ -s "$file" ] && scanProject "$file" 
+  done
+
+  scanner 
+}
+
+scanDefined(){
+  find "$ROOT_FOLDER" -type f -name "$PROJECT_FILTER.norg" | while IFS= read -r file; do
+  [ -s "$file" ] && scanProject "$file" 
+  done
+  scanner
+}
+
+scanFile() {
+  [ -n "$ADD_TEXT" ] && addTask && exit 0
+  scanProject "$ROOT_FILE" 
+  scanner 
 }
 
 scanProject(){
@@ -49,20 +65,5 @@ scanProject(){
   grep -e "- (" "$input_file" | sed 's/( ) |/(Z) |/ ' | sort | sed 's/(Z) |/( ) |/'  >> "$tempFile"
 }
 
-processDate(){ 
-  fv=$(echo "$1" | grep -oP '(?<=~)\d{4}-\d{2}-\d{2}')
-  if [[ -n "$fv" ]]; then
-    f_actual=$(date +%F)
-    f_final=$(date -d "$f_actual + $DATE_FILTER" +%F)
-    f_start=$(date -d "$f_actual" +%s)
-    f_end=$(date -d "$f_final" +%s)
-    f_scan=$(date -d "$fv" +%s)
-    if [[ "$f_scan" -ge "$f_start" ]] && [[ "$f_scan" -le "$f_end" ]]; then
-      echo "$1" >> "$2"
-    fi
-  else
-    echo "$1" >> "$2"
-  fi
-}
 
 

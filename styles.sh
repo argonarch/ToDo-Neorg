@@ -1,5 +1,16 @@
 #!/bin/bash
 
+arrow=$Green"->"$Nc
+todoClick=$Green" "$Nc 
+todoNone=$Red" "$Nc
+todoProcess=$Yellow" "$Nc
+charA=$Yellow"A"$Nc
+charB=$Green"B"$Nc
+charC=$Blue"C"$Nc
+charD=$Red"D"$Nc
+champ="$Green|$Nc"
+
+
 # Reset
 Nc='[0m'       # Text Reset
 

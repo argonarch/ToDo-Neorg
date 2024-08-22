@@ -1,8 +1,8 @@
 #!/bin/bash
 source "$(dirname "$0")/tasker.sh"
 source "$(dirname "$0")/order.sh"
-source "$(dirname "$0")/sender.sh"
 source "$(dirname "$0")/utils.sh"
+source "$(dirname "$0")/scanner.sh"
 
 main(){
   while [[ $# -gt 0 ]]; do
@@ -26,14 +26,11 @@ main(){
       -f|--file)
           [ -n "$2" ] && ROOT_FILE="$2" && shift 2 ;;
       -o|--order)
-          order
-          exit 0 ;;
+          order && exit 0 ;;
       -s|--sender)
-          sender
-          exit 0 ;;
+          sendTask && exit 0 ;;
       -l|--list)
-          listProjects
-          exit 0 ;;
+          listProjects && exit 0 ;;
     esac
   done
   if [ -n "$ROOT_FOLDER" ] && [ -n "$FILTER" ]; then
